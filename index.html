@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="km">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>កម្មវិធីបង្កើតលំហាត់ស្វ័យប្រវត្តិ</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts for Khmer with explicit display swap -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Moul&display=swap"
+    rel="stylesheet">
+  <!-- html2canvas Library for PNG Export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Kantumruy Pro', sans-serif;
+      background-color: #f1f5f9;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .font-moul {
+      font-family: 'Moul', serif;
+    }
+
+    /* Standard ID Card Dimensions: 85.6mm x 54mm */
+    .id-card {
+      width: 85.6mm;
+      height: 54mm;
+      box-sizing: border-box;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Fixed A4 Dimensions for Screen, PNG Export, and PDF Printing (Portrait) */
+    .a4-page {
+      width: 210mm;
+      height: 297mm;
+      padding: 6mm 6mm 4mm 6mm;
+      margin: 0 auto;
+      background: white;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+      box-sizing: border-box;
+    }
+
+    /* Precise Print styling rules for A4 Portrait */
+    @page {
+      size: A4 portrait;
+      margin: 0;
+    }
+
+    @media print {
+      body {
+        background: white !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      .no-print {
+        display: none !important;
+      }
+
+      .a4-page {
+        box-shadow: none !important;
+        border: none !important;
+        margin: 0 !important;
+        width: 210mm !important;
+        height: 297mm !important;
+        padding: 6mm 6mm 4mm 6mm !important;
+        page-break-after: always;
+        page-break-inside: avoid;
+        box-sizing: border-box !important;
+      }
+
+      .id-card {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+    }
+
+    /* Custom styles for 10 problems layout (2 columns) */
+    .problems-grid-10 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 2px 8px;
+      width: 100%;
+      height: 100%;
+      align-content: space-evenly;
+    }
+
+    /* Custom styles for 5 problems layout (1 column) */
+    .problems-grid-5 {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-evenly;
+      width: 100%;
+      height: 100%;
+    }
+
+    .problem-item {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 1px 4px;
+      font-size: 8.5px;
+      width: 100%;
+    }
+  </style>
+</head>
+
+<body class="text-slate-800 antialiased min-h-screen">
+
+  <header class="bg-indigo-700 text-white shadow-lg no-print sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-2">
+      <div class="flex items-center space-x-3 space-x-reverse">
+        <a href="../../index.html"
+          class="no-print bg-indigo-800 hover:bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition border border-indigo-500">
+          ← ត្រឡប់ទៅទំព័រដើម
+        </a>
+        <div class="p-2 bg-indigo-600 rounded-xl shadow-inner border border-indigo-400/30">
+          <svg class="w-7 h-7 text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
+            </path>
+          </svg>
+        </div>
+        <h1 class="text-xl font-bold font-moul tracking-wide">កម្មវិធីបង្កើតលំហាត់ស្វ័យប្រវត្តិ</h1>
+      </div>
+      <div class="flex items-center space-x-2 space-x-reverse flex-wrap gap-2">
+        <a href="operation_exercise.html"
+          class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-2 rounded-lg shadow transition flex items-center gap-1.5 text-xs sm:text-sm active:scale-95 border border-emerald-400/30"
+          title="ទៅកាន់កម្មវិធីបង្កើតប័ណ្ណលំហាត់ប្រមាណវិធី">
+          <svg class="w-4 h-4 text-emerald-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z">
+            </path>
+          </svg>
+          លំហាត់ប្រមាណវិធី
+        </a>
+        <button onclick="generateCards()"
+          class="bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold px-3 py-2 rounded-lg shadow transition flex items-center gap-1.5 text-xs sm:text-sm active:scale-95">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
+            </path>
+          </svg>
+          បង្កើតថ្មី
+        </button>
+        <button id="downloadAllSingleBtn" onclick="downloadAllSingleCards()"
+          class="bg-sky-600 hover:bg-sky-700 text-white font-bold px-3 py-2 rounded-lg shadow transition flex items-center gap-1.5 text-xs sm:text-sm active:scale-95"
+          title="ទាញយកគ្រប់កាតជារូបទោលដាច់ដោយឡែកពីគ្នា">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
+            </path>
+          </svg>
+          ទាញយកកាតនីមួយៗ (PNG)
+        </button>
+        <button id="downloadPngBtn" onclick="downloadAsPNG()"
+          class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-2 rounded-lg shadow transition flex items-center gap-1.5 text-xs sm:text-sm active:scale-95">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
+            </path>
+          </svg>
+          រក្សាទុក A4 ជា PNG
+        </button>
+        <button onclick="window.print()"
+          class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-2 rounded-lg shadow transition flex items-center gap-1.5 text-xs sm:text-sm active:scale-95">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z">
+            </path>
+          </svg>
+          បោះពុម្ព (Print)
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="max-w-7xl mx-auto px-2 sm:px-4 py-6 flex flex-col lg:flex-row gap-6">
+
+    <!-- Control Panel Sidebar (No Print) -->
+    <aside class="w-full lg:w-80 bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-4 no-print h-fit">
+      <!-- Quick navigation to Operation Exercise -->
+      <a href="operation_exercise.html"
+        class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold p-2.5 rounded-xl shadow-sm transition flex items-center justify-between group active:scale-98">
+        <div class="flex items-center gap-2">
+          <div class="p-1.5 bg-white/20 rounded-lg">
+            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z">
+              </path>
+            </svg>
+          </div>
+          <div class="text-left">
+            <div class="text-xs font-bold">លំហាត់ប្រមាណវិធី (A4)</div>
+            <div class="text-[10px] text-emerald-100 font-normal">បង្កើតប័ណ្ណលំហាត់ A4 / ក្រឡា</div>
+          </div>
+        </div>
+        <span class="text-white/80 group-hover:translate-x-0.5 transition transform text-xs font-bold">→</span>
+      </a>
+
+      <h2 class="text-lg font-bold border-b pb-2 text-indigo-950 flex items-center gap-2">
+        <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4">
+          </path>
+        </svg>
+        ការកំណត់លំហាត់
+      </h2>
+
+      <!-- Card Header Title -->
+      <div>
+        <label class="block text-sm font-semibold text-slate-700 mb-1">ចំណងជើងលើកាត</label>
+        <input type="text" id="cardTitle" value="លំហាត់គណិតវិទ្យា"
+          class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm">
+      </div>
+
+      <!-- Subtitle/Instructions -->
+      <div>
+        <label class="block text-sm font-semibold text-slate-700 mb-1">ការណែនាំ/កត់ត្រា (ផ្នែកខាងលើ)</label>
+        <input type="text" id="cardSubtitle" value="ចូលគណនាប្រមាណវិធីខាងក្រោម៖"
+          class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm">
+      </div>
+
+      <!-- Card Theme Palette -->
+      <div>
+        <label class="block text-sm font-semibold text-indigo-950 mb-1 flex items-center gap-1">
+          <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 73l3-3m-3 3l3 3">
+            </path>
+          </svg>
+          ពណ៌ស៊ុមកាត (Card Theme)
+        </label>
+        <select id="cardTheme"
+          class="w-full px-3 py-2 border border-indigo-200 bg-indigo-50/60 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm font-semibold text-indigo-950">
+          <option value="ocean" selected>សមុទ្រខៀវស្រងាត់ (Ocean Blue)</option>
+          <option value="sunset">ថ្ងៃរៀបលិចពណ៌មាស (Sunset Gold)</option>
+          <option value="emerald">សួនព្រៃខៀវខ្ចី (Emerald Green)</option>
+          <option value="rose">កុលាបផ្កាឈូក (Rose Pink)</option>
+          <option value="purple">ស្វាយរាជវង្ស (Royal Purple)</option>
+          <option value="rainbow">ចម្រុះពណ៌ស្រស់ស្អាត (Multi-Color Mix)</option>
+        </select>
+      </div>
+
+      <!-- Grade Level Selector -->
+      <div>
+        <label class="block text-sm font-semibold text-indigo-950 mb-1 flex items-center gap-1">
+          <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0112 20.055a11.952 11.952 0 01-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z">
+            </path>
+          </svg>
+          កម្រិតថ្នាក់សិក្សា ( Grade Level )
+        </label>
+        <select id="gradeLevel"
+          class="w-full px-3 py-2 border border-indigo-200 bg-indigo-50/60 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm font-semibold text-indigo-950">
+          <option value="g1">ថ្នាក់ទី១ (លេខ ១-២០ | បូក, ដក)</option>
+          <option value="g2" selected>ថ្នាក់ទី២ (លេខ ១-១០០ | បូក, ដក, គុណ)</option>
+          <option value="g3">ថ្នាក់ទី៣ (លេខ ១-៥០០ | គ្រប់ប្រមាណវិធី)</option>
+          <option value="g4">ថ្នាក់ទី៤ (លេខ ១-១ ០០០ | ចំនួនគត់ & ទសភាគ)</option>
+          <option value="g5">ថ្នាក់ទី៥ (លេខ ១-៥ ០០០ | ចំនួនគត់ & ទសភាគ)</option>
+          <option value="g6">ថ្នាក់ទី៦ (លេខ ១-១០ ០០០ | ចំនួនគត់ & ទសភាគ)</option>
+        </select>
+      </div>
+
+      <!-- Author Name & URL/Link for A4 Footer -->
+      <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 space-y-2.5">
+        <h3 class="text-xs font-bold text-indigo-900 uppercase tracking-wider flex items-center gap-1">
+          <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+          </svg>
+          ព័ត៌មានអ្នករៀបរៀង (Footer ក្រដាស A4)
+        </h3>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">ឈ្មោះអ្នករៀបរៀង</label>
+          <input type="text" id="authorName" value="លោកគ្រូ នាង នី" placeholder="ឧ. លោកគ្រូ..."
+            class="w-full px-3 py-1.5 border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:outline-none text-xs bg-white">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">តំណភ្ជាប់ / URL / Website</label>
+          <input type="text" id="authorUrl" value="" placeholder="https://..."
+            class="w-full px-3 py-1.5 border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:outline-none text-xs bg-white">
+        </div>
+      </div>
+
+      <!-- Operation Type -->
+      <div>
+        <label class="block text-sm font-semibold text-slate-700 mb-1">ប្រភេទប្រមាណវិធី</label>
+        <select id="opType"
+          class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm">
+          <option value="add">វិធីបូក (+)</option>
+          <option value="sub">វិធីដក (-)</option>
+          <option value="mul">វិធីគុណ (×)</option>
+          <option value="div">វិធីចែក (÷)</option>
+          <option value="mixed" selected>ច្របូកច្របល់ (+, -, ×, ÷)</option>
+        </select>
+      </div>
+
+      <!-- Number Range -->
+      <div>
+        <label class="block text-sm font-semibold text-slate-700 mb-1">កម្រិតលេខ</label>
+        <select id="numRange"
+          class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm">
+          <option value="10">លេខតូច (១ ដល់ ១០)</option>
+          <option value="20">លេខ (១ ដល់ ២០)</option>
+          <option value="50">លេខ (១ ដល់ ៥០)</option>
+          <option value="100" selected>លេខរយ (១ ដល់ ១០០)</option>
+          <option value="500">លេខរយ (១ ដល់ ៥០០)</option>
+          <option value="1000">លេខពាន់ (១ ដល់ ១ ០០០)</option>
+          <option value="5000">លេខពាន់ (១ ដល់ ៥ ០០០)</option>
+          <option value="10000">លេខម៉ឺន (១ ដល់ ១០ ០០០)</option>
+        </select>
+      </div>
+
+      <!-- Problems per Card - Strictly 5 and 10 -->
+      <div>
+        <label class="block text-sm font-semibold text-slate-700 mb-1">ចំនួនលំហាត់ក្នុង ១ កាត</label>
+        <select id="problemsPerCard"
+          class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm">
+          <option value="5">៥ លំហាត់</option>
+          <option value="10" selected>១០ លំហាត់</option>
+        </select>
+      </div>
+
+      <!-- Total Cards to generate -->
+      <div>
+        <label class="block text-sm font-semibold text-slate-700 mb-1">ចំនួនកាតសរុបត្រូវបង្កើត</label>
+        <input type="number" id="totalCards" value="10" min="1" max="50"
+          class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm">
+        <p class="text-xs text-slate-500 mt-1">* កាតទី១ ងាយស្រួល រហូតដល់កាតទី១០ ពិបាកបំផុត (តម្រៀបលំដាប់)</p>
+      </div>
+
+      <!-- Number System (Khmer vs Arabic) -->
+      <div>
+        <label class="block text-sm font-semibold text-slate-700 mb-1">ប្រព័ន្ធលេខ</label>
+        <select id="numSystem"
+          class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm">
+          <option value="khmer" selected>លេខខ្មែរ (០, ១, ២...)</option>
+          <option value="arabic">លេខសកល (0, 1, 2...)</option>
+        </select>
+      </div>
+
+      <!-- Font / Number Size -->
+      <div>
+        <label class="block text-sm font-semibold text-slate-700 mb-1">ទំហំលេខ/អក្សរលំហាត់</label>
+        <select id="fontSize"
+          class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm">
+          <option value="7">តូច (7px)</option>
+          <option value="8">តូចល្មម (8px)</option>
+          <option value="8.5" selected>ធម្មតា (8.5px)</option>
+          <option value="9.5">ធំល្មម (9.5px)</option>
+          <option value="10.5">ធំ (10.5px)</option>
+          <option value="12">ធំខ្លាំង (12px)</option>
+          <option value="14">ធំបំផុត (14px)</option>
+        </select>
+      </div>
+
+      <!-- Refresh Button -->
+      <button onclick="generateCards()"
+        class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-lg shadow transition active:scale-98 mt-2">
+        ធ្វើបច្ចុប្បន្នភាពកាត
+      </button>
+    </aside>
+
+    <main class="flex-1 flex flex-col items-center">
+      <div class="w-full mb-3 flex justify-between items-center no-print">
+        <span class="text-sm font-semibold text-slate-600" id="cardCountInfo">បង្ហាញកាតសរុប៖ ១០ កាត (១ ទំព័រ A4)</span>
+        <span
+          class="text-xs bg-indigo-100 text-indigo-900 px-3 py-1 rounded-full font-semibold border border-indigo-200/60 shadow-2xs">ទំហំកាត៖
+          8.56cm x 5.4cm (ទំហំកាតសិស្ស - A4 Portrait)</span>
+      </div>
+
+      <!-- Container where A4 Portrait Pages will be rendered -->
+      <div id="pagesContainer" class="w-full flex flex-col items-center gap-8">
+        <!-- Dynamic Pages with Cards will be inserted here -->
+      </div>
+    </main>
+
+  </div>
+
+  <script>
+    // Convert Arabic Digits to Khmer Digits
+    function toKhmerNum(num) {
+      const khmerDigits = ['០', '១', '២', '៣', '៤', '៥', '៦', '៧', '៨', '៩'];
+      return String(num).replace(/\d/g, d => khmerDigits[d]);
+    }
+
+    // Convert Number index to Khmer Letters (ក, ខ, គ, ឃ, ង, ច, ឆ, ជ, ឈ, ញ)
+    function toKhmerLetter(index) {
+      const khmerLetters = ['ក', 'ខ', 'គ', 'ឃ', 'ង', 'ច', 'ឆ', 'ជ', 'ឈ', 'ញ', 'ដ', 'ឋ', 'ឌ', 'ឍ', 'ណ', 'ត', 'ថ', 'ទ', 'ធ', 'ន'];
+      return khmerLetters[(index - 1) % khmerLetters.length];
+    }
+
+    // Format number: No commas for > 3 digits, use SPACE instead!
+    function formatNum(num, system) {
+      let formattedStr = '';
+      if (typeof num === 'number') {
+        formattedStr = num.toLocaleString('en-US').replace(/,/g, ' ');
+      } else {
+        formattedStr = String(num).replace(/,/g, ' ');
+      }
+      return system === 'khmer' ? toKhmerNum(formattedStr) : formattedStr;
+    }
+
+    // Decimal Problem Generator (With progressive difficulty support, NO FRACTIONS)
+    function generateDecimalProblem(opType, maxDecimals, system, diffFactor = 1) {
+      const ops = ['add', 'sub', 'mul', 'div'];
+      const type = opType === 'mixed' ? ops[Math.floor(Math.random() * ops.length)] : opType;
+
+      let num1, num2, symbol;
+      const scale = maxDecimals === 1 ? 10 : 100;
+      const s = (val) => Math.max(3, Math.floor(val * diffFactor));
+
+      if (type === 'add') {
+        symbol = '+';
+        num1 = (Math.floor(Math.random() * s(15) * scale) + 1) / scale;
+        num2 = (Math.floor(Math.random() * s(15) * scale) + 1) / scale;
+      } else if (type === 'sub') {
+        symbol = '-';
+        num1 = (Math.floor(Math.random() * s(25) * scale) + 10) / scale;
+        num2 = (Math.floor(Math.random() * (num1 * scale - 1)) + 1) / scale;
+      } else if (type === 'mul') {
+        symbol = '×';
+        num1 = (Math.floor(Math.random() * s(8) * 10) + 1) / 10;
+        num2 = maxDecimals === 1 ? (Math.floor(Math.random() * s(8)) + 2) : (Math.floor(Math.random() * s(4) * 10) + 1) / 10;
+      } else {
+        symbol = '÷';
+        num2 = (Math.floor(Math.random() * s(4) * 10) + 1) / 10;
+        const mult = Math.floor(Math.random() * s(8)) + 1;
+        num1 = Math.round(num2 * mult * 100) / 100;
+      }
+
+      num1 = Math.round(num1 * 100) / 100;
+      num2 = Math.round(num2 * 100) / 100;
+
+      const s1 = formatNum(num1, system);
+      const s2 = formatNum(num2, system);
+
+      return `${s1} <span class="font-bold px-0.5" style="color: inherit;">${symbol}</span> ${s2} <span class="font-bold ml-1" style="color: inherit;">=</span>`;
+    }
+
+    // Standard Whole Number Problem Generator (Progressive difficulty from Card 1 easy to Card 10 hard)
+    function generateWholeNumberProblem(opType, maxRange, grade, system, diffFactor = 1) {
+      let type = opType;
+
+      if (grade === 'g1') {
+        if (type === 'mixed' || type === 'mul' || type === 'div') {
+          type = Math.random() < 0.5 ? 'add' : 'sub';
+        }
+      } else if (grade === 'g2' && type === 'mixed') {
+        const types = ['add', 'sub', 'add', 'sub', 'mul'];
+        type = types[Math.floor(Math.random() * types.length)];
+      } else if (type === 'mixed') {
+        const types = ['add', 'sub', 'mul', 'div'];
+        type = types[Math.floor(Math.random() * types.length)];
+      }
+
+      let num1, num2, symbol;
+      const s = (val) => Math.max(2, Math.floor(val * diffFactor));
+
+      if (grade === 'g1') {
+        if (type === 'add') {
+          symbol = '+';
+          num1 = Math.floor(Math.random() * s(15)) + 1;
+          num2 = Math.floor(Math.random() * s(15)) + 1;
+        } else {
+          symbol = '-';
+          num1 = Math.floor(Math.random() * s(18)) + 2;
+          num2 = Math.floor(Math.random() * num1) + 1;
+        }
+      } else if (grade === 'g2') {
+        if (type === 'add') {
+          symbol = '+';
+          num1 = Math.floor(Math.random() * s(80)) + 10;
+          num2 = Math.floor(Math.random() * s(80)) + 1;
+        } else if (type === 'sub') {
+          symbol = '-';
+          num1 = Math.floor(Math.random() * s(90)) + 10;
+          num2 = Math.floor(Math.random() * (num1 - 1)) + 1;
+        } else if (type === 'mul') {
+          symbol = '×';
+          num1 = Math.floor(Math.random() * s(9)) + 2;
+          num2 = Math.floor(Math.random() * s(9)) + 2;
+        } else {
+          symbol = '÷';
+          num2 = Math.floor(Math.random() * s(8)) + 2;
+          const quotient = Math.floor(Math.random() * s(9)) + 1;
+          num1 = num2 * quotient;
+        }
+      } else if (grade === 'g3') {
+        if (type === 'add') {
+          symbol = '+';
+          num1 = Math.floor(Math.random() * s(350)) + 50;
+          num2 = Math.floor(Math.random() * s(350)) + 10;
+        } else if (type === 'sub') {
+          symbol = '-';
+          num1 = Math.floor(Math.random() * s(400)) + 50;
+          num2 = Math.floor(Math.random() * Math.max(1, num1 - 10)) + 5;
+        } else if (type === 'mul') {
+          symbol = '×';
+          num1 = Math.floor(Math.random() * s(15)) + 3;
+          num2 = Math.floor(Math.random() * s(9)) + 2;
+        } else {
+          symbol = '÷';
+          num2 = Math.floor(Math.random() * s(9)) + 2;
+          const quotient = Math.floor(Math.random() * s(15)) + 2;
+          num1 = num2 * quotient;
+        }
+      } else {
+        let currentMax = Math.max(5, Math.floor(maxRange * diffFactor));
+        switch (type) {
+          case 'add':
+            symbol = '+';
+            num1 = Math.floor(Math.random() * (currentMax - 1)) + 1;
+            num2 = Math.floor(Math.random() * currentMax) + 1;
+            break;
+          case 'sub':
+            symbol = '-';
+            num1 = Math.floor(Math.random() * currentMax) + 2;
+            num2 = Math.floor(Math.random() * (num1 - 1)) + 1;
+            break;
+          case 'mul':
+            symbol = '×';
+            let maxF = currentMax > 50 ? 20 : (currentMax > 20 ? 12 : 10);
+            maxF = Math.max(3, Math.floor(maxF * diffFactor));
+            num1 = Math.floor(Math.random() * maxF) + 1;
+            num2 = Math.floor(Math.random() * maxF) + 1;
+            break;
+          case 'div':
+            symbol = '÷';
+            num2 = Math.floor(Math.random() * Math.max(3, s(9))) + 2;
+            const quotient = Math.floor(Math.random() * Math.max(3, s(10))) + 1;
+            num1 = num2 * quotient;
+            break;
+        }
+      }
+
+      const s1 = formatNum(num1, system);
+      const s2 = formatNum(num2, system);
+      return `${s1} <span class="font-bold px-0.5" style="color: inherit;">${symbol}</span> ${s2} <span class="font-bold ml-1" style="color: inherit;">=</span>`;
+    }
+
+    // Main Problem Router
+    function generateProblemHTML(opType, maxRange, grade, system, diffFactor = 1) {
+      if (grade === 'g4') {
+        const rand = Math.random();
+        if (rand < 0.50) {
+          return generateDecimalProblem(opType, 1, system, diffFactor);
+        } else {
+          return generateWholeNumberProblem(opType, 1000, 'g4', system, diffFactor);
+        }
+      } else if (grade === 'g5') {
+        const rand = Math.random();
+        if (rand < 0.55) {
+          return generateDecimalProblem(opType, 2, system, diffFactor);
+        } else {
+          return generateWholeNumberProblem(opType, 5000, 'g5', system, diffFactor);
+        }
+      } else if (grade === 'g6') {
+        const rand = Math.random();
+        if (rand < 0.60) {
+          return generateDecimalProblem(opType, 2, system, diffFactor);
+        } else {
+          return generateWholeNumberProblem(opType, 10000, 'g6', system, diffFactor);
+        }
+      } else {
+        return generateWholeNumberProblem(opType, maxRange, grade, system, diffFactor);
+      }
+    }
+
+    const cardThemes = {
+      ocean: {
+        border: 'border-[#3b82f6]',
+        shadow: 'shadow-[0_4px_20px_-4px_rgba(59,130,246,0.25)]',
+        headerBg: 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white',
+        itemText: 'text-slate-900',
+        badgeBg: 'bg-blue-500 text-white shadow-xs',
+        badgeBadge: 'bg-white/20 text-white',
+        footerBorder: 'border-blue-200',
+        accentColor: '#2563eb'
+      },
+      sunset: {
+        border: 'border-[#f59e0b]',
+        shadow: 'shadow-[0_4px_20px_-4px_rgba(245,158,11,0.25)]',
+        headerBg: 'bg-gradient-to-r from-amber-500 to-orange-600 text-white',
+        itemText: 'text-slate-900',
+        badgeBg: 'bg-amber-500 text-white shadow-xs',
+        badgeBadge: 'bg-white/20 text-white',
+        footerBorder: 'border-amber-200',
+        accentColor: '#d97706'
+      },
+      emerald: {
+        border: 'border-[#10b981]',
+        shadow: 'shadow-[0_4px_20px_-4px_rgba(16,185,129,0.25)]',
+        headerBg: 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white',
+        itemText: 'text-slate-900',
+        badgeBg: 'bg-emerald-500 text-white shadow-xs',
+        badgeBadge: 'bg-white/20 text-white',
+        footerBorder: 'border-emerald-200',
+        accentColor: '#059669'
+      },
+      rose: {
+        border: 'border-[#f43f5e]',
+        shadow: 'shadow-[0_4px_20px_-4px_rgba(244,63,94,0.25)]',
+        headerBg: 'bg-gradient-to-r from-rose-500 to-pink-600 text-white',
+        itemText: 'text-slate-900',
+        badgeBg: 'bg-rose-500 text-white shadow-xs',
+        badgeBadge: 'bg-white/20 text-white',
+        footerBorder: 'border-rose-200',
+        accentColor: '#e11d48'
+      },
+      purple: {
+        border: 'border-[#8b5cf6]',
+        shadow: 'shadow-[0_4px_20px_-4px_rgba(139,92,246,0.25)]',
+        headerBg: 'bg-gradient-to-r from-purple-600 to-violet-700 text-white',
+        itemText: 'text-slate-900',
+        badgeBg: 'bg-purple-500 text-white shadow-xs',
+        badgeBadge: 'bg-white/20 text-white',
+        footerBorder: 'border-purple-200',
+        accentColor: '#7c3aed'
+      },
+      rainbow: {
+        border: 'border-[#6366f1]',
+        shadow: 'shadow-[0_4px_20px_-4px_rgba(99,102,241,0.25)]',
+        headerBg: 'bg-gradient-to-r from-violet-600 via-pink-600 to-amber-500 text-white',
+        itemText: 'text-slate-900',
+        badgeBg: 'bg-indigo-600 text-white shadow-xs',
+        badgeBadge: 'bg-white/20 text-white',
+        footerBorder: 'border-indigo-200',
+        accentColor: '#4f46e5'
+      }
+    };
+
+    // Generate Cards Layout inside A4 Portrait Pages (2 columns x 5 rows)
+    function generateCards() {
+      const cardTitle = document.getElementById('cardTitle').value || 'លំហាត់គណិតវិទ្យា';
+      const cardSubtitle = document.getElementById('cardSubtitle').value || '';
+      const authorName = document.getElementById('authorName').value.trim();
+      const authorUrl = document.getElementById('authorUrl').value.trim();
+      const grade = document.getElementById('gradeLevel').value;
+      const opType = document.getElementById('opType').value;
+      const maxRange = parseInt(document.getElementById('numRange').value, 10);
+      const problemsPerCard = parseInt(document.getElementById('problemsPerCard').value, 10) || 10;
+      const totalCards = parseInt(document.getElementById('totalCards').value, 10) || 1;
+      const numSystem = document.getElementById('numSystem').value;
+      const fontSize = document.getElementById('fontSize') ? document.getElementById('fontSize').value : '8.5';
+      const themeKey = document.getElementById('cardTheme').value;
+      const theme = cardThemes[themeKey] || cardThemes.ocean;
+
+      const container = document.getElementById('pagesContainer');
+      container.innerHTML = '';
+
+      const cardsPerPage = 10; // 2 columns x 5 rows per A4 page portrait
+      const totalPages = Math.ceil(totalCards / cardsPerPage);
+
+      document.getElementById('cardCountInfo').textContent =
+        `បង្ហាញកាតសរុប៖ ${formatNum(totalCards, numSystem)} កាត (${formatNum(totalPages, numSystem)} ទំព័រ A4 Portrait)`;
+
+      let currentCardIndex = 0;
+
+      for (let p = 0; p < totalPages; p++) {
+        const pageDiv = document.createElement('div');
+        pageDiv.className = 'a4-page border border-slate-300 rounded-2xl flex flex-col justify-between items-center relative';
+        pageDiv.id = `a4-page-${p + 1}`;
+
+        const gridDiv = document.createElement('div');
+        gridDiv.className = 'grid grid-cols-2 gap-x-3 gap-y-2 w-full justify-items-center items-center';
+
+        const cardsInThisPage = Math.min(cardsPerPage, totalCards - currentCardIndex);
+
+        for (let c = 0; c < cardsInThisPage; c++) {
+          currentCardIndex++;
+
+          let progressRatio = totalCards > 1 ? (currentCardIndex - 1) / (totalCards - 1) : 0;
+          let diffFactor = 0.25 + (1.25 * progressRatio);
+
+          const card = document.createElement('div');
+          card.className = `id-card border-[2px] ${theme.border} rounded-[14px] p-[6px] bg-white flex flex-col justify-between ${theme.shadow} relative overflow-hidden group`;
+
+          const bgPattern = `
+            <div class="absolute inset-0 opacity-[0.03] pointer-events-none" style="background-image: radial-gradient(${theme.accentColor} 1.2px, transparent 1.2px); background-size: 8px 8px;"></div>
+          `;
+
+          // Button opacity starts at 0, goes to 100 on group hover to avoid covering the score text initially
+          const singleDownloadBtn = `
+            <button onclick="downloadSingleCard(this, ${currentCardIndex})" title="ទាញយកកាតទី ${formatNum(currentCardIndex, numSystem)} ជា PNG" class="no-print absolute top-1 right-1 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white px-2 py-0.5 rounded-full text-[8.5px] font-bold shadow-xs transition z-20 flex items-center gap-1 opacity-0 group-hover:opacity-100 focus:opacity-100">
+              <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+              <span>ទាញយក</span>
+            </button>
+          `;
+
+          // Adding the "ពិន្ទុ.........." section at the top right
+          let headerHTML = `
+            <div class="border-b pb-[2px] mb-1 relative z-10 shrink-0" style="border-color: rgba(0,0,0,0.1);">
+              <div class="flex justify-between items-end text-[10px] font-bold km-text">
+                <span class="font-moul leading-tight truncate pr-1" style="color: ${theme.accentColor};">${cardTitle}</span>
+                <span class="text-[9px] text-slate-800 whitespace-nowrap leading-tight mb-[1px]">ពិន្ទុ..........</span>
+              </div>
+              ${cardSubtitle ? `<div class="text-[7.5px] opacity-90 font-bold italic mt-[1px] leading-tight km-text text-center w-full" style="color: ${themeKey === 'rainbow' ? '#312e81' : 'inherit'};">${cardSubtitle}</div>` : ''}
+            </div>
+          `;
+
+          let problemsHTML = '';
+          const isTwoColumns = problemsPerCard > 5;
+          const gridClass = isTwoColumns ? 'problems-grid-10' : 'problems-grid-5';
+
+          for (let i = 0; i < problemsPerCard; i++) {
+            const probHTML = generateProblemHTML(opType, maxRange, grade, numSystem, diffFactor);
+            const labelLetter = toKhmerLetter(i + 1);
+
+            problemsHTML += `
+              <div class="problem-item" style="font-size: ${fontSize}px;">
+                <span class="font-bold ${theme.itemText} flex items-center justify-start leading-none km-text whitespace-nowrap overflow-visible w-full">
+                  <span class="w-[18px] inline-block text-left mr-1">${labelLetter}.</span>
+                  ${probHTML}
+                </span>
+              </div>
+            `;
+          }
+
+          const footerHTML = `
+            <div class="flex justify-between items-center text-[7.5px] text-slate-500 pt-[2px] mt-auto border-t km-text relative z-10 shrink-0" style="border-color: rgba(0,0,0,0.1);">
+              <span class="font-medium">ថ្ងៃទី....ខែ....ឆ្នាំ២០....</span>
+              <span class="font-medium">ហត្ថលេខាគ្រូ៖ ....................</span>
+            </div>
+          `;
+
+          card.innerHTML = `
+            ${bgPattern}
+            ${singleDownloadBtn}
+            ${headerHTML}
+            <div class="${gridClass} flex-grow relative z-10 my-0.5">
+              ${problemsHTML}
+            </div>
+            ${footerHTML}
+          `;
+
+          gridDiv.appendChild(card);
+        }
+
+        pageDiv.appendChild(gridDiv);
+
+        const pageFooter = document.createElement('div');
+        pageFooter.className = 'w-full text-[9.5px] text-slate-500 pt-1 mt-auto border-t border-slate-200 flex justify-between items-center px-1 km-text';
+
+        const authorDisplay = authorName ? `រៀបរៀងដោយ៖ <strong class="text-indigo-950 font-semibold">${authorName}</strong>` : '';
+        const urlDisplay = authorUrl ? `<span class="text-indigo-600 font-medium">${authorUrl}</span>` : '';
+        const pageNumDisplay = `ទំព័រទី ${formatNum(p + 1, numSystem)} / ${formatNum(totalPages, numSystem)}`;
+
+        pageFooter.innerHTML = `
+          <div>${authorDisplay}</div>
+          <div>${urlDisplay}</div>
+          <div>${pageNumDisplay}</div>
+        `;
+
+        pageDiv.appendChild(pageFooter);
+        container.appendChild(pageDiv);
+      }
+    }
+
+    function prepareClonedDocForCapture(clonedDoc) {
+      const elements = clonedDoc.querySelectorAll('.km-text, .id-card, span, div');
+      elements.forEach(el => {
+        el.style.lineHeight = '1.6';
+        el.style.overflow = 'visible';
+      });
+    }
+
+    async function downloadSingleCard(btn, cardIndex) {
+      const card = btn.closest('.id-card');
+      if (!card) return;
+
+      const originalText = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = `<svg class="animate-spin w-3 h-3 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`;
+
+      try {
+        if (document.fonts && document.fonts.ready) {
+          await document.fonts.ready;
+        }
+        await new Promise(r => setTimeout(r, 100));
+
+        const canvas = await html2canvas(card, {
+          scale: 4,
+          useCORS: true,
+          backgroundColor: '#ffffff',
+          logging: false,
+          ignoreElements: (element) => element.classList.contains('no-print'),
+          onclone: prepareClonedDocForCapture
+        });
+
+        const image = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.href = image;
+        link.download = `exercise_card_${cardIndex}.png`;
+        link.click();
+      } catch (error) {
+        console.error('Error generating single card PNG:', error);
+      } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+      }
+    }
+
+    async function downloadAllSingleCards() {
+      const cards = document.querySelectorAll('.id-card');
+      if (!cards.length) return;
+
+      const btn = document.getElementById('downloadAllSingleBtn');
+      const originalText = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = `
+        <svg class="animate-spin w-4 h-4 text-white" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <span>កំពុងទាញយក...</span>
+      `;
+
+      try {
+        if (document.fonts && document.fonts.ready) {
+          await document.fonts.ready;
+        }
+        await new Promise(r => setTimeout(r, 150));
+
+        for (let i = 0; i < cards.length; i++) {
+          const card = cards[i];
+          const canvas = await html2canvas(card, {
+            scale: 4,
+            useCORS: true,
+            backgroundColor: '#ffffff',
+            logging: false,
+            ignoreElements: (element) => element.classList.contains('no-print'),
+            onclone: prepareClonedDocForCapture
+          });
+
+          const image = canvas.toDataURL('image/png');
+          const link = document.createElement('a');
+          link.href = image;
+          link.download = `exercise_card_${i + 1}.png`;
+          link.click();
+
+          if (cards.length > 1) {
+            await new Promise(resolve => setTimeout(resolve, 300));
+          }
+        }
+      } catch (error) {
+        console.error('Error generating single cards PNG:', error);
+      } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+      }
+    }
+
+    async function downloadAsPNG() {
+      const pages = document.querySelectorAll('.a4-page');
+      if (!pages.length) return;
+
+      const btn = document.getElementById('downloadPngBtn');
+      const originalText = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = `
+        <svg class="animate-spin w-4 h-4 text-white" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <span>កំពុងទាញយក...</span>
+      `;
+
+      try {
+        if (document.fonts && document.fonts.ready) {
+          await document.fonts.ready;
+        }
+        await new Promise(r => setTimeout(r, 150));
+
+        for (let i = 0; i < pages.length; i++) {
+          const page = pages[i];
+
+          const canvas = await html2canvas(page, {
+            scale: 3,
+            useCORS: true,
+            backgroundColor: '#ffffff',
+            logging: false,
+            ignoreElements: (element) => element.classList.contains('no-print'),
+            onclone: (clonedDoc) => {
+              prepareClonedDocForCapture(clonedDoc);
+              const clonedPage = clonedDoc.getElementById(page.id);
+              if (clonedPage) {
+                clonedPage.style.boxShadow = 'none';
+                clonedPage.style.border = 'none';
+              }
+            }
+          });
+
+          const image = canvas.toDataURL('image/png');
+          const link = document.createElement('a');
+          link.href = image;
+          link.download = `exercise_cards_page_${i + 1}.png`;
+          link.click();
+
+          if (pages.length > 1) {
+            await new Promise(resolve => setTimeout(resolve, 400));
+          }
+        }
+      } catch (error) {
+        console.error('Error generating PNG:', error);
+      } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+      }
+    }
+
+    function initAutoListeners() {
+      const inputs = [
+        'cardTitle', 'cardSubtitle', 'authorName', 'authorUrl',
+        'gradeLevel', 'opType', 'numRange', 'problemsPerCard', 'totalCards',
+        'numSystem', 'fontSize', 'cardTheme'
+      ];
+
+      inputs.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.addEventListener('change', generateCards);
+          el.addEventListener('input', generateCards);
+        }
+      });
+    }
+
+    window.onload = function () {
+      initAutoListeners();
+      generateCards();
+    };
+  </script>
+</body>
+
+</html>
